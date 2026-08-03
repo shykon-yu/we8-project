@@ -1,0 +1,19 @@
+# Independently versioned application repositories
+/platform/
+/soccer_php/
+/soccer_v3/
+
+# Local environment and secrets
+/.env
+/.env.docker
+/.env.*.local
+
+# Local tooling and generated files
+/.DS_Store
+**/.DS_Store
+/.playwright-cli/
+/.pnpm-store/
+/generated-images/
+/.idea/
+/.vscode/
+*.log

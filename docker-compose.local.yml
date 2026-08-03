@@ -1,0 +1,185 @@
+name: pes8-local
+
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: deploy/mysql/Dockerfile
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: platform
+      MYSQL_USER: platform
+      MYSQL_PASSWORD: platform-local-password
+      MYSQL_ROOT_PASSWORD: root-local-password
+    ports:
+      - "3308:3306"
+    volumes:
+      - pes8_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot-local-password"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [pes8]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redis-local-password
+    ports:
+      - "6381:6379"
+    volumes:
+      - pes8_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "redis-local-password", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [pes8]
+
+  soccer-app:
+    build:
+      context: ./soccer_php
+      dockerfile: docker/php/Dockerfile
+    restart: unless-stopped
+    working_dir: /var/www
+    command: sh -c "chown -R www-data:www-data storage bootstrap/cache && php-fpm"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_KEY: base64:7w8Rr5L8x4eQWz6pFfC1vZ5h5mV8jK2nY9cQ0sD3aB4=
+      APP_URL: http://localhost:8088
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: soccer
+      DB_USERNAME: soccer
+      DB_PASSWORD: soccer-local-password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis-local-password
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: sync
+      JWT_SECRET: local-soccer-jwt-secret-change-me
+      RABBITMQ_HOST: rabbitmq
+    volumes:
+      - ./soccer_php:/var/www
+      - soccer_vendor:/var/www/vendor
+      - soccer_storage:/var/www/storage
+    depends_on:
+      soccer-migrate:
+        condition: service_completed_successfully
+    networks:
+      pes8:
+        aliases:
+          - app
+
+  soccer-migrate:
+    build:
+      context: ./soccer_php
+      dockerfile: docker/php/Dockerfile
+    restart: "no"
+    working_dir: /var/www
+    command: php artisan migrate --force --seed --seeder=SystemSeeder
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "false"
+      APP_KEY: base64:7w8Rr5L8x4eQWz6pFfC1vZ5h5mV8jK2nY9cQ0sD3aB4=
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: soccer
+      DB_USERNAME: soccer
+      DB_PASSWORD: soccer-local-password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis-local-password
+      JWT_SECRET: local-soccer-jwt-secret-change-me
+    volumes:
+      - ./soccer_php:/var/www
+      - soccer_vendor:/var/www/vendor
+      - soccer_storage:/var/www/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [pes8]
+
+  soccer-nginx:
+    image: nginx:1.25-alpine
+    restart: unless-stopped
+    ports:
+      - "8088:80"
+    volumes:
+      - ./soccer_php:/var/www:ro
+      - ./soccer_php/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      soccer-app:
+        condition: service_started
+    networks: [pes8]
+
+  platform-api:
+    build:
+      context: ./platform/backend
+      dockerfile: Dockerfile
+      target: development
+    restart: unless-stopped
+    environment:
+      APP_ENV: development
+      API_PORT: 8080
+      MYSQL_DSN: 'platform:platform-local-password@tcp(mysql:3306)/platform?parseTime=true&charset=utf8mb4&loc=Local'
+      REDIS_ADDR: redis:6379
+      REDIS_PASSWORD: redis-local-password
+      JWT_SECRET: local-platform-jwt-secret-change-me
+      SOCCER_AUTH_URL: http://soccer-nginx/api/v1/auth/login
+      CORS_ORIGIN: http://localhost:1421,http://localhost:5173
+      SOFTETHER_MODE: mock
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./platform/backend:/app
+      - go_cache:/go/pkg/mod
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      soccer-nginx:
+        condition: service_started
+    networks: [pes8]
+
+  soccer-web:
+    build:
+      context: ./soccer_v3
+      args:
+        VITE_API_BASE_URL: http://localhost:8088
+        VITE_API_PREFIX: /api
+    restart: unless-stopped
+    ports:
+      - "8852:80"
+    networks: [pes8]
+
+  platform-web:
+    build:
+      context: ./platform/frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8082/api/v1
+    restart: unless-stopped
+    ports:
+      - "1421:80"
+    depends_on:
+      - platform-api
+    networks: [pes8]
+
+volumes:
+  pes8_mysql_data:
+  pes8_redis_data:
+  soccer_vendor:
+  soccer_storage:
+  go_cache:
+
+networks:
+  pes8:
+    driver: bridge

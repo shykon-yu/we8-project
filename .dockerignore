@@ -1,0 +1,11 @@
+*
+!deploy/
+!deploy/mysql/
+!deploy/mysql/Dockerfile
+!deploy/mysql/init/
+!deploy/mysql/init/000-create-soccer.sql
+!platform/
+!platform/deploy/
+!platform/deploy/mysql/
+!platform/deploy/mysql/init/
+!platform/deploy/mysql/init/001_schema.sql
