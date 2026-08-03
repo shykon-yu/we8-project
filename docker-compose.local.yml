@@ -147,6 +147,7 @@ services:
       - ./platform/backend:/app
       - go_cache:/go/pkg/mod
       - ${SOFTETHER_VPNCMD_HOST_PATH:-./deploy/softether/vpncmd}:/usr/local/bin/vpncmd:ro
+      - ${SOFTETHER_HAMCORE_HOST_PATH:-./deploy/softether/hamcore.se2}:/usr/local/bin/hamcore.se2:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

@@ -8,6 +8,7 @@
 /.env.docker
 /.env.*.local
 /deploy/softether/vpncmd
+/deploy/softether/hamcore.se2
 
 # Local tooling and generated files
 /.DS_Store
