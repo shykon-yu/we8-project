@@ -134,13 +134,21 @@ services:
       REDIS_PASSWORD: redis-local-password
       JWT_SECRET: local-platform-jwt-secret-change-me
       SOCCER_AUTH_URL: http://soccer-nginx/api/v1/auth/login
-      CORS_ORIGIN: http://localhost:1421,http://localhost:5173
-      SOFTETHER_MODE: mock
+      CORS_ORIGIN: http://localhost:1421,http://localhost:5173,http://www.jingzhu.top:1421
+      SOFTETHER_MODE: ${SOFTETHER_MODE:-vpncmd}
+      SOFTETHER_CLIENT_HOST: ${SOFTETHER_CLIENT_HOST:-www.jingzhu.top}
+      SOFTETHER_CLIENT_PORT: ${SOFTETHER_CLIENT_PORT:-443}
+      SOFTETHER_ADMIN_ENDPOINT: ${SOFTETHER_ADMIN_ENDPOINT:-host.docker.internal:5555}
+      SOFTETHER_ADMIN_PASSWORD: ${SOFTETHER_ADMIN_PASSWORD:?Set SOFTETHER_ADMIN_PASSWORD in .env}
+      SOFTETHER_VPNCMD_PATH: /usr/local/bin/vpncmd
     ports:
       - "8082:8080"
     volumes:
       - ./platform/backend:/app
       - go_cache:/go/pkg/mod
+      - ${SOFTETHER_VPNCMD_HOST_PATH:-./deploy/softether/vpncmd}:/usr/local/bin/vpncmd:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       mysql:
         condition: service_healthy

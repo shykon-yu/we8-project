@@ -7,6 +7,7 @@
 /.env
 /.env.docker
 /.env.*.local
+/deploy/softether/vpncmd
 
 # Local tooling and generated files
 /.DS_Store

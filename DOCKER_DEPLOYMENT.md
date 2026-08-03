@@ -89,9 +89,17 @@ platform_users
 在 `/Users/shykon/project` 执行：
 
 ```bash
+cp .env.softether.example .env
+# 编辑 .env，至少填写真实 SOFTETHER_ADMIN_PASSWORD。
 docker compose -f docker-compose.local.yml up -d --build
 docker compose -f docker-compose.local.yml ps
 docker compose -f docker-compose.local.yml logs -f soccer-migrate soccer-app platform-api
+```
+
+如果只是开发页面、不连接真实 SoftEther，可以在 `.env` 里临时设置：
+
+```text
+SOFTETHER_MODE=mock
 ```
 
 首次启动会自动：
@@ -148,6 +156,68 @@ docker compose -f docker-compose.local.yml up -d --build
 - MySQL volume 定时备份到服务器目录或对象存储。
 - SoftEther 建议独立运行，仅向 platform API 开放内网管理接口。
 - phpMyAdmin、Mailpit、开发热更新和调试端口不进入生产 Compose。
+
+## 8. 测试服 SoftEther
+
+当前 `docker-compose.local.yml` 已按测试服真实 SoftEther 模式配置：
+
+```text
+SOFTETHER_MODE=vpncmd
+SOFTETHER_CLIENT_HOST=www.jingzhu.top
+SOFTETHER_CLIENT_PORT=443
+SOFTETHER_ADMIN_ENDPOINT=host.docker.internal:5555
+SOFTETHER_VPNCMD_HOST_PATH=./deploy/softether/vpncmd
+```
+
+服务器需要准备：
+
+1. 安装并启动 SoftEther VPN Server。
+2. 开启 SoftEther 管理端口 `5555`，允许 Docker 容器访问宿主机。
+3. 创建和 `platform` 房间一致的 Virtual Hub：
+
+```text
+we8-room-01
+we8-room-02
+...
+we8-room-12
+```
+
+4. 把 Linux 版 `vpncmd` 放到：
+
+```text
+deploy/softether/vpncmd
+```
+
+并赋予执行权限：
+
+```bash
+chmod +x deploy/softether/vpncmd
+```
+
+5. 创建 `.env`，填写真实管理员密码：
+
+```bash
+cp .env.softether.example .env
+vi .env
+```
+
+`.env` 中至少要改：
+
+```text
+SOFTETHER_ADMIN_PASSWORD=你的SoftEther管理员密码
+```
+
+如果 SoftEther VPN Server 不在 Docker 宿主机上，把 `SOFTETHER_ADMIN_ENDPOINT` 改成实际管理地址，例如：
+
+```text
+SOFTETHER_ADMIN_ENDPOINT=10.0.0.8:5555
+```
+
+`SOFTETHER_CLIENT_HOST` 是 Windows 客户端连接 VPN Server 时使用的公网域名或 IP。测试服目前使用：
+
+```text
+www.jingzhu.top
+```
 
 推荐域名：
 
