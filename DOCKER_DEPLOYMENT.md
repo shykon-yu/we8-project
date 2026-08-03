@@ -164,7 +164,7 @@ docker compose -f docker-compose.local.yml up -d --build
 ```text
 SOFTETHER_MODE=vpncmd
 SOFTETHER_CLIENT_HOST=www.jingzhu.top
-SOFTETHER_CLIENT_PORT=443
+SOFTETHER_CLIENT_PORT=992
 SOFTETHER_ADMIN_ENDPOINT=host.docker.internal:5555
 SOFTETHER_VPNCMD_HOST_PATH=./deploy/softether/vpncmd
 ```
@@ -182,10 +182,11 @@ we8-room-02
 we8-room-12
 ```
 
-4. 把 Linux 版 `vpncmd` 放到：
+4. 把同一 SoftEther 版本的 Linux `vpncmd` 和 `hamcore.se2` 放到：
 
 ```text
 deploy/softether/vpncmd
+deploy/softether/hamcore.se2
 ```
 
 并赋予执行权限：
@@ -193,6 +194,9 @@ deploy/softether/vpncmd
 ```bash
 chmod +x deploy/softether/vpncmd
 ```
+
+测试服需要在阿里云安全组和服务器防火墙中开放 `992/TCP`，供 Windows
+SoftEther VPN Client 连接。管理端口 `5555` 不应向公网开放。
 
 5. 创建 `.env`，填写真实管理员密码：
 
