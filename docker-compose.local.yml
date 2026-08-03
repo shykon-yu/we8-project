@@ -130,6 +130,7 @@ services:
       APP_ENV: development
       API_PORT: 8080
       MYSQL_DSN: 'platform:platform-local-password@tcp(mysql:3306)/platform?parseTime=true&charset=utf8mb4&loc=Local'
+      SOCCER_MYSQL_DSN: 'soccer:soccer-local-password@tcp(mysql:3306)/soccer?parseTime=true&charset=utf8mb4&loc=Local'
       REDIS_ADDR: redis:6379
       REDIS_PASSWORD: redis-local-password
       JWT_SECRET: local-platform-jwt-secret-change-me
