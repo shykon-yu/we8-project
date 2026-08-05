@@ -23,7 +23,7 @@ services:
     networks: [pes8]
 
   redis:
-    image: redis:7-alpine
+    image: docker.m.daocloud.io/library/redis:7-alpine
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass redis-local-password
     ports:
@@ -108,7 +108,7 @@ services:
     networks: [pes8]
 
   soccer-nginx:
-    image: nginx:1.25-alpine
+    image: docker.m.daocloud.io/library/nginx:1.25-alpine
     restart: unless-stopped
     ports:
       - "8088:80"
