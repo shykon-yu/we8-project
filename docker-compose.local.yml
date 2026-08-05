@@ -82,8 +82,7 @@ services:
     restart: "no"
     working_dir: /var/www
     command: >
-      sh -c 'until php -r "$$dsn = \"mysql:host=\".getenv(\"DB_HOST\").\";port=\".getenv(\"DB_PORT\").\";dbname=\".getenv(\"DB_DATABASE\");
-      new PDO($$dsn, getenv(\"DB_USERNAME\"), getenv(\"DB_PASSWORD\"));"; do
+      sh -c 'until php -r "new PDO(\"mysql:host=\".getenv(\"DB_HOST\").\";port=\".getenv(\"DB_PORT\").\";dbname=\".getenv(\"DB_DATABASE\"), getenv(\"DB_USERNAME\"), getenv(\"DB_PASSWORD\"));"; do
       echo "waiting for soccer database...";
       sleep 2;
       done;
