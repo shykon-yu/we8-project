@@ -81,7 +81,13 @@ services:
       dockerfile: docker/php/Dockerfile
     restart: "no"
     working_dir: /var/www
-    command: php artisan migrate --force --seed --seeder=SystemSeeder
+    command: >
+      sh -c 'until php -r "$$dsn = \"mysql:host=\".getenv(\"DB_HOST\").\";port=\".getenv(\"DB_PORT\").\";dbname=\".getenv(\"DB_DATABASE\");
+      new PDO($$dsn, getenv(\"DB_USERNAME\"), getenv(\"DB_PASSWORD\"));"; do
+      echo "waiting for soccer database...";
+      sleep 2;
+      done;
+      php artisan migrate --force --seed --seeder=SystemSeeder'
     environment:
       APP_ENV: local
       APP_DEBUG: "false"
