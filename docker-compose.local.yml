@@ -139,7 +139,7 @@ services:
       REDIS_ADDR: redis:6379
       REDIS_PASSWORD: redis-local-password
       JWT_SECRET: local-platform-jwt-secret-change-me
-      SOCCER_AUTH_URL: http://soccer-nginx/api/v1/auth/login
+      SOCCER_AUTH_URL: http://soccer-nginx/api/v1/auth/platform-login
       CORS_ORIGIN: ${CORS_ORIGIN:-http://8.133.189.9:1421,http://localhost:1421,http://localhost:5173,http://www.jingzhu.top:1421,http://tauri.localhost,https://tauri.localhost,tauri://localhost}
       SOFTETHER_MODE: ${SOFTETHER_MODE:-vpncmd}
       SOFTETHER_CLIENT_HOST: ${SOFTETHER_CLIENT_HOST:-8.133.189.9}
