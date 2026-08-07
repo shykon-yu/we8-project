@@ -140,22 +140,15 @@ services:
       REDIS_PASSWORD: redis-local-password
       JWT_SECRET: local-platform-jwt-secret-change-me
       SOCCER_AUTH_URL: http://soccer-nginx/api/v1/auth/platform-login
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://8.133.189.9:1421,http://localhost:1421,http://localhost:5173,http://www.jingzhu.top:1421,http://tauri.localhost,https://tauri.localhost,tauri://localhost}
-      SOFTETHER_MODE: ${SOFTETHER_MODE:-vpncmd}
-      SOFTETHER_CLIENT_HOST: ${SOFTETHER_CLIENT_HOST:-8.133.189.9}
-      SOFTETHER_CLIENT_PORT: ${SOFTETHER_CLIENT_PORT:-992}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://8.133.189.9:1421,http://localhost:1421,http://localhost:5173}
+      OPENVPN_CLIENT_HOST: ${OPENVPN_CLIENT_HOST:-8.133.189.9}
       OPENVPN_CLIENT_PORT_BASE: ${OPENVPN_CLIENT_PORT_BASE:-12000}
-      OPENVPN_ROOM_PORTS: ${OPENVPN_ROOM_PORTS:-}
-      SOFTETHER_ADMIN_ENDPOINT: ${SOFTETHER_ADMIN_ENDPOINT:-host.docker.internal:5555}
-      SOFTETHER_ADMIN_PASSWORD: ${SOFTETHER_ADMIN_PASSWORD:?Set SOFTETHER_ADMIN_PASSWORD in .env}
-      SOFTETHER_VPNCMD_PATH: /usr/local/bin/vpncmd
+      OPENVPN_ROOM_PORTS: ${OPENVPN_ROOM_PORTS:-1:12001,2:12002,3:12003,4:12004,5:12005,6:12006}
     ports:
       - "8082:8080"
     volumes:
       - ./platform/backend:/app
       - go_cache:/go/pkg/mod
-      - ${SOFTETHER_VPNCMD_HOST_PATH:-./deploy/softether/vpncmd}:/usr/local/bin/vpncmd:ro
-      - ${SOFTETHER_HAMCORE_HOST_PATH:-./deploy/softether/hamcore.se2}:/usr/local/bin/hamcore.se2:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -180,12 +173,14 @@ services:
 
   platform-web:
     build:
-      context: ./platform/frontend
+      context: ./welopenvpn/frontend
       args:
         VITE_API_BASE_URL: ${PLATFORM_WEB_API_BASE_URL:-http://8.133.189.9:8082/api/v1}
     restart: unless-stopped
     ports:
       - "1421:80"
+    volumes:
+      - ./downloads/welopenvpn:/usr/share/nginx/html/downloads/welopenvpn:ro
     depends_on:
       - platform-api
     networks: [pes8]
