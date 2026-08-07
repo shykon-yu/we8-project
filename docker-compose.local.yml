@@ -179,8 +179,6 @@ services:
     restart: unless-stopped
     ports:
       - "1421:80"
-    volumes:
-      - ./downloads/welopenvpn:/usr/share/nginx/html/downloads/welopenvpn:ro
     depends_on:
       - platform-api
     networks: [pes8]
